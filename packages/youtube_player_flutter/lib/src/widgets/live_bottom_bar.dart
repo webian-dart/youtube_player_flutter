@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../utils/object_extension_methods.dart';
 import '../utils/youtube_player_controller.dart';
 import 'duration_widgets.dart';
 import 'full_screen_button.dart';
@@ -11,7 +12,7 @@ import 'full_screen_button.dart';
 /// A widget to display bottom controls bar on Live Video Mode.
 class LiveBottomBar extends StatefulWidget {
   /// Overrides the default [YoutubePlayerController].
-  final YoutubePlayerController controller;
+  final YoutubePlayerController? controller;
 
   /// Defines color for UI.
   final Color liveUIColor;
@@ -19,7 +20,7 @@ class LiveBottomBar extends StatefulWidget {
   /// Creates [LiveBottomBar] widget.
   LiveBottomBar({
     this.controller,
-    @required this.liveUIColor,
+    required this.liveUIColor,
   });
 
   @override
@@ -29,7 +30,7 @@ class LiveBottomBar extends StatefulWidget {
 class _LiveBottomBarState extends State<LiveBottomBar> {
   double _currentSliderPosition = 0.0;
 
-  YoutubePlayerController _controller;
+  YoutubePlayerController? _controller;
 
   @override
   void didChangeDependencies() {
@@ -43,7 +44,7 @@ class _LiveBottomBarState extends State<LiveBottomBar> {
       );
       _controller = widget.controller;
     }
-    _controller.addListener(listener);
+    _controller?.addListener(listener);
   }
 
   @override
@@ -55,11 +56,12 @@ class _LiveBottomBarState extends State<LiveBottomBar> {
   void listener() {
     if (mounted) {
       setState(() {
-        _currentSliderPosition =
-            _controller.metadata.duration.inMilliseconds == 0
-                ? 0
-                : _controller.value.position.inMilliseconds /
-                    _controller.metadata.duration.inMilliseconds;
+        _controller?.and((it) {
+          _currentSliderPosition = it?.metadata.duration.inMilliseconds == 0
+              ? 0
+              : it.value.position.inMilliseconds /
+                  it.metadata.duration.inMilliseconds;
+        });
       });
     }
   }
@@ -67,7 +69,7 @@ class _LiveBottomBarState extends State<LiveBottomBar> {
   @override
   Widget build(BuildContext context) {
     return Visibility(
-      visible: _controller.value.isControlsVisible,
+      visible: _controller?.value.isControlsVisible ?? false,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -80,10 +82,11 @@ class _LiveBottomBarState extends State<LiveBottomBar> {
               child: Slider(
                 value: _currentSliderPosition,
                 onChanged: (value) {
-                  _controller.seekTo(
+                  _controller?.seekTo(
                     Duration(
                       milliseconds:
-                          (_controller.metadata.duration.inMilliseconds * value)
+                          (_controller?.metadata.duration.inMilliseconds ??
+                                  0 * value)
                               .round(),
                     ),
                   );
@@ -97,7 +100,8 @@ class _LiveBottomBarState extends State<LiveBottomBar> {
             ),
           ),
           InkWell(
-            onTap: () => _controller.seekTo(_controller.metadata.duration),
+            onTap: () =>
+                _controller?.and((it) => it.seekTo(it.metadata.duration)),
             child: Material(
               color: widget.liveUIColor,
               child: const Text(

@@ -4,26 +4,26 @@ import 'dart:ui' show window;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:youtube_player_flutter/src/player/youtube_player.dart';
 import 'package:youtube_player_flutter/src/utils/youtube_player_controller.dart';
 import 'package:youtube_player_flutter/src/utils/youtube_player_flags.dart';
 import 'package:youtube_player_flutter/src/widgets/widgets.dart';
 
 Widget buildPlayer({
-  YoutubePlayerController controller,
-  double width,
-  List<Widget> bottomActions,
-  List<Widget> topActions,
+  required YoutubePlayerController controller,
+  double? width,
+  List<Widget>? bottomActions,
+  List<Widget>? topActions,
   bool showVideoProgressIndicator = true,
   double aspectRatio = 16 / 9,
-  Widget bufferIndicator,
+  Widget? bufferIndicator,
   Duration controlsTimeOut = const Duration(seconds: 3),
   Color liveUIColor = Colors.red,
-  void Function() onReady,
-  ProgressBarColors progressBarColors,
-  Color progressIndicatorColor,
-  Widget thumbnail,
+  void Function()? onReady,
+  ProgressBarColors? progressBarColors,
+  Color? progressIndicatorColor,
+  Widget? thumbnail,
   EdgeInsetsGeometry actionsPadding = const EdgeInsets.all(8.0),
 }) {
   return TestApp(
@@ -38,15 +38,15 @@ Widget buildPlayer({
       controlsTimeOut: controlsTimeOut,
       liveUIColor: liveUIColor,
       onReady: onReady,
-      progressColors: progressBarColors,
-      progressIndicatorColor: progressIndicatorColor,
+      progressColors: progressBarColors ?? const ProgressBarColors(),
+      progressIndicatorColor: progressIndicatorColor ?? Colors.transparent,
       thumbnail: thumbnail,
-      topActions: topActions,
+      topActions: topActions ?? [],
     ),
   );
 }
 
-YoutubePlayerController createController([YoutubePlayerFlags flags]) {
+YoutubePlayerController createController([YoutubePlayerFlags? flags]) {
   return YoutubePlayerController(
     initialVideoId: 'p2lYr3vM_1w',
     flags: flags ?? const YoutubePlayerFlags(hideThumbnail: true),
@@ -71,7 +71,7 @@ class TestApp extends StatelessWidget {
 
   TestApp({
     this.textDirection = TextDirection.ltr,
-    this.child,
+    required this.child,
   });
 
   @override
@@ -110,20 +110,20 @@ class MockHttpHeaders extends Mock implements HttpHeaders {}
 
 // Returns a mock HTTP client that responds with an image to all requests.
 MockHttpClient _createMockImageHttpClient(
-    SecurityContext _, List<int> imageBytes) {
+    SecurityContext? _, List<int> imageBytes) {
   final client = MockHttpClient();
   final request = MockHttpClientRequest();
   final response = MockHttpClientResponse();
   final headers = MockHttpHeaders();
 
-  when(client.getUrl(any))
+  when(() => client.getUrl(any()))
       .thenAnswer((_) => Future<HttpClientRequest>.value(request));
-  when(request.headers).thenReturn(headers);
-  when(request.close())
+  when(() => request.headers).thenReturn(headers);
+  when(request.close)
       .thenAnswer((_) => Future<HttpClientResponse>.value(response));
-  when(response.contentLength).thenReturn(_transparentImage.length);
-  when(response.statusCode).thenReturn(HttpStatus.ok);
-  when(response.listen(any)).thenAnswer((Invocation invocation) {
+  when(() => response.contentLength).thenReturn(_transparentImage.length);
+  when(() => response.statusCode).thenReturn(HttpStatus.ok);
+  when(() => response.listen(any())).thenAnswer((Invocation invocation) {
     final void Function(List<int>) onData = invocation.positionalArguments[0];
     final void Function() onDone = invocation.namedArguments[#onDone];
     final void Function(Object, [StackTrace]) onError =

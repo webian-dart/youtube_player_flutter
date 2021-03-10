@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../utils/object_extension_methods.dart';
 import '../utils/youtube_player_controller.dart';
 
 /// Defines different colors for [ProgressBar].
@@ -22,18 +23,18 @@ class ProgressBarColors {
 
   /// Creates [ProgressBarColors].
   const ProgressBarColors({
-    this.backgroundColor,
-    this.playedColor,
-    this.bufferedColor,
-    this.handleColor,
+    this.backgroundColor = Colors.transparent,
+    this.playedColor = Colors.transparent,
+    this.bufferedColor = Colors.transparent,
+    this.handleColor = Colors.transparent,
   });
 
   ///
   ProgressBarColors copyWith({
-    Color backgroundColor,
-    Color playedColor,
-    Color bufferedColor,
-    Color handleColor,
+    Color? backgroundColor,
+    Color? playedColor,
+    Color? bufferedColor,
+    Color? handleColor,
   }) =>
       ProgressBarColors(
         backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -46,7 +47,7 @@ class ProgressBarColors {
 /// A widget to display video progress bar.
 class ProgressBar extends StatefulWidget {
   /// Overrides the default [YoutubePlayerController].
-  final YoutubePlayerController controller;
+  final YoutubePlayerController? controller;
 
   /// Defines colors for the progress bar.
   final ProgressBarColors colors;
@@ -59,7 +60,7 @@ class ProgressBar extends StatefulWidget {
   /// Creates [ProgressBar] widget.
   ProgressBar({
     this.controller,
-    this.colors,
+    required this.colors,
     this.isExpanded = false,
   });
 
@@ -70,7 +71,7 @@ class ProgressBar extends StatefulWidget {
 }
 
 class _ProgressBarState extends State<ProgressBar> {
-  YoutubePlayerController _controller;
+  YoutubePlayerController? _controller;
 
   Offset _touchPoint = Offset.zero;
 
@@ -78,7 +79,7 @@ class _ProgressBarState extends State<ProgressBar> {
   double _bufferedValue = 0.0;
 
   bool _touchDown = false;
-  Duration _position;
+  Duration? _position;
 
   @override
   void didChangeDependencies() {
@@ -92,7 +93,7 @@ class _ProgressBarState extends State<ProgressBar> {
       );
       _controller = widget.controller;
     }
-    _controller.addListener(positionListener);
+    _controller?.addListener(positionListener);
     positionListener();
   }
 
@@ -103,55 +104,66 @@ class _ProgressBarState extends State<ProgressBar> {
   }
 
   void positionListener() {
-    var _totalDuration = _controller.metadata.duration?.inMilliseconds;
-    if (mounted && !_totalDuration.isNaN && _totalDuration != 0) {
+    var _totalDuration = _controller?.metadata.duration.inMilliseconds ?? 0;
+    if (mounted && _totalDuration.isNaN == false && _totalDuration != 0) {
       setState(() {
-        _playedValue =
-            _controller.value.position.inMilliseconds / _totalDuration;
-        _bufferedValue = _controller.value.buffered;
+        _controller?.and((it) {
+          _playedValue = it.value.position.inMilliseconds / _totalDuration;
+          _bufferedValue = it.value.buffered;
+        });
       });
     }
   }
 
   void _setValue() {
-    _playedValue = _touchPoint.dx / context.size.width;
+    _playedValue = _touchPoint.dx / (context.size?.width ?? 0);
   }
 
   void _checkTouchPoint() {
     if (_touchPoint.dx <= 0) {
       _touchPoint = Offset(0, _touchPoint.dy);
     }
-    if (_touchPoint.dx >= context.size.width) {
-      _touchPoint = Offset(context.size.width, _touchPoint.dy);
+    final width = (context.size?.width ?? 0);
+    if (_touchPoint.dx >= width) {
+      _touchPoint = Offset(width, _touchPoint.dy);
     }
   }
 
   void _seekToRelativePosition(Offset globalPosition) {
-    final RenderBox box = context.findRenderObject();
-    _touchPoint = box.globalToLocal(globalPosition);
-    _checkTouchPoint();
-    final relative = _touchPoint.dx / box.size.width;
-    _position = _controller.metadata.duration * relative;
-    _controller.seekTo(_position, allowSeekAhead: false);
+    context.findRenderObject()?.and((it) {
+      if (it is! RenderBox) return;
+      _touchPoint = it.globalToLocal(globalPosition);
+      _checkTouchPoint();
+      final relative = _touchPoint.dx / it.size.width;
+      final position =
+          (_controller?.metadata.duration ?? Duration.zero) * relative;
+      _position = position;
+      _controller?.seekTo(position, allowSeekAhead: false);
+    });
   }
 
   void _dragEndActions() {
-    _controller.updateValue(
-      _controller.value.copyWith(isControlsVisible: false, isDragging: false),
-    );
-    _controller.seekTo(_position, allowSeekAhead: true);
-    setState(() {
-      _touchDown = false;
+    _controller?.and((it) {
+      it.updateValue(
+        it.value.copyWith(isControlsVisible: false, isDragging: false),
+      );
+      it.seekTo(_position ?? Duration.zero, allowSeekAhead: true);
+      setState(() {
+        _touchDown = false;
+      });
+      it.play();
     });
-    _controller.play();
   }
 
   Widget _buildBar() {
     return GestureDetector(
       onHorizontalDragDown: (details) {
-        _controller.updateValue(
-          _controller.value.copyWith(isControlsVisible: true, isDragging: true),
-        );
+        _controller?.and((it) {
+          it.updateValue(
+            it.value.copyWith(isControlsVisible: true, isDragging: true),
+          );
+        });
+
         _seekToRelativePosition(details.globalPosition);
         setState(() {
           _setValue();
@@ -194,18 +206,18 @@ class _ProgressBarPainter extends CustomPainter {
   final double handleRadius;
   final double playedValue;
   final double bufferedValue;
-  final ProgressBarColors colors;
   final bool touchDown;
   final ThemeData themeData;
+  final ProgressBarColors? colors;
 
   _ProgressBarPainter({
-    this.progressWidth,
-    this.handleRadius,
-    this.playedValue,
-    this.bufferedValue,
+    required this.progressWidth,
+    required this.handleRadius,
+    required this.playedValue,
+    required this.bufferedValue,
+    required this.touchDown,
+    required this.themeData,
     this.colors,
-    this.touchDown,
-    this.themeData,
   });
 
   @override

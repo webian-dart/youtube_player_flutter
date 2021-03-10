@@ -13,7 +13,7 @@ import 'youtube_value_provider.dart';
 /// Widget that builds itself based on the latest snapshot of interaction with a [YoutubePlayerController].
 class YoutubeValueBuilder extends StatelessWidget {
   /// The [YoutubePlayerController].
-  final YoutubePlayerController controller;
+  final YoutubePlayerController? controller;
 
   /// Build strategy fot the widget.
   final Widget Function(BuildContext, YoutubePlayerValue) builder;
@@ -26,9 +26,9 @@ class YoutubeValueBuilder extends StatelessWidget {
   ///
   /// The [builder] must not be null.
   const YoutubeValueBuilder({
-    Key key,
+    Key? key,
     this.controller,
-    @required this.builder,
+    required this.builder,
   }) : super(key: key);
 
   @override
@@ -39,8 +39,8 @@ class YoutubeValueBuilder extends StatelessWidget {
       stream: _controller,
       initialData: _controller.value,
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return builder(context, snapshot.data);
+        if (snapshot.hasData && snapshot.data != null) {
+          return builder(context, snapshot.data!);
         } else if (snapshot.hasError) {
           log(snapshot.error.toString());
         }
