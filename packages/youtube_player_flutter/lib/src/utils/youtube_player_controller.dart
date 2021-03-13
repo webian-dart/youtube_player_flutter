@@ -288,7 +288,7 @@ class YoutubePlayerController extends ValueNotifier<YoutubePlayerValue> {
   }
 
   /// MetaData for the currently loaded or cued video.
-  YoutubeMetaData get metadata => value.metaData;
+  YoutubeMetaData? get metadata => value.metaData;
 
   /// Reloads the player.
   ///

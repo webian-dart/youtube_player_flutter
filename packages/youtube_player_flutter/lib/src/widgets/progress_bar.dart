@@ -104,7 +104,7 @@ class _ProgressBarState extends State<ProgressBar> {
   }
 
   void positionListener() {
-    var _totalDuration = _controller?.metadata.duration.inMilliseconds ?? 0;
+    var _totalDuration = (_controller?.metadata?.duration.inMilliseconds ?? 0);
     if (mounted && _totalDuration.isNaN == false && _totalDuration != 0) {
       setState(() {
         _controller?.and((it) {
@@ -136,7 +136,7 @@ class _ProgressBarState extends State<ProgressBar> {
       _checkTouchPoint();
       final relative = _touchPoint.dx / it.size.width;
       final position =
-          (_controller?.metadata.duration ?? Duration.zero) * relative;
+          (_controller?.metadata?.duration ?? Duration.zero) * relative;
       _position = position;
       _controller?.seekTo(position, allowSeekAhead: false);
     });

@@ -44,7 +44,10 @@ class _VideoListState extends State<VideoList> {
             bottomActions: [
               CurrentPosition(),
               const SizedBox(width: 10.0),
-              ProgressBar(isExpanded: true),
+              ProgressBar(
+                isExpanded: true,
+                colors: const ProgressBarColors(),
+              ),
               const SizedBox(width: 10.0),
               RemainingDuration(),
               FullScreenButton(),

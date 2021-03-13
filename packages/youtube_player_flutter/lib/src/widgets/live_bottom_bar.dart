@@ -57,10 +57,10 @@ class _LiveBottomBarState extends State<LiveBottomBar> {
     if (mounted) {
       setState(() {
         _controller?.and((it) {
-          _currentSliderPosition = it?.metadata.duration.inMilliseconds == 0
+          _currentSliderPosition = it.metadata?.duration.inMilliseconds == 0
               ? 0
               : it.value.position.inMilliseconds /
-                  it.metadata.duration.inMilliseconds;
+                  (it.metadata?.duration.inMilliseconds ?? 0);
         });
       });
     }
@@ -85,8 +85,9 @@ class _LiveBottomBarState extends State<LiveBottomBar> {
                   _controller?.seekTo(
                     Duration(
                       milliseconds:
-                          (_controller?.metadata.duration.inMilliseconds ??
-                                  0 * value)
+                          ((_controller?.metadata?.duration.inMilliseconds ??
+                                      0) *
+                                  value)
                               .round(),
                     ),
                   );
@@ -100,8 +101,8 @@ class _LiveBottomBarState extends State<LiveBottomBar> {
             ),
           ),
           InkWell(
-            onTap: () =>
-                _controller?.and((it) => it.seekTo(it.metadata.duration)),
+            onTap: () => _controller?.and(
+                (it) => it.seekTo(it.metadata?.duration ?? Duration.zero)),
             child: Material(
               color: widget.liveUIColor,
               child: const Text(

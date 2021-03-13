@@ -260,7 +260,7 @@ class _YoutubePlayerState extends State<YoutubePlayer> {
                         child: Text(
                           errorString(
                             controller.value.errorCode,
-                            videoId: controller.metadata.videoId ??
+                            videoId: controller.metadata?.videoId ??
                                 controller.initialVideoId,
                           ),
                           style: const TextStyle(
@@ -305,7 +305,7 @@ class _YoutubePlayerState extends State<YoutubePlayer> {
               key: widget.key,
               onEnded: (YoutubeMetaData? metaData) {
                 if (controller.flags.loop) {
-                  controller.load(controller.metadata.videoId,
+                  controller.load(controller.metadata?.videoId ?? "",
                       startAt: controller.flags.startAt,
                       endAt: controller.flags.endAt);
                 }
@@ -405,18 +405,18 @@ class _YoutubePlayerState extends State<YoutubePlayer> {
 
   Widget get _thumbnail => Image.network(
         YoutubePlayer.getThumbnail(
-          videoId: controller.metadata.videoId.isEmpty
+          videoId: controller.metadata?.videoId.isEmpty ?? true
               ? controller.initialVideoId
-              : controller.metadata.videoId,
+              : controller.metadata?.videoId ?? "",
         ),
         fit: BoxFit.cover,
         loadingBuilder: (_, child, progress) =>
             progress == null ? child : Container(color: Colors.black),
         errorBuilder: (context, _, __) => Image.network(
           YoutubePlayer.getThumbnail(
-            videoId: controller.metadata.videoId.isEmpty
+            videoId: controller.metadata?.videoId.isEmpty ?? true
                 ? controller.initialVideoId
-                : controller.metadata.videoId,
+                : controller.metadata?.videoId ?? "",
             webp: false,
           ),
           fit: BoxFit.cover,
